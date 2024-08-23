@@ -1,0 +1,20 @@
+[versions]
+kotlin = "2.0.0"
+ktor = "2.3.12"
+logback-classic =  "1.4.14"
+
+[libraries]
+ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
+ktor-server-netty = { module = "io.ktor:ktor-server-netty", version.ref = "ktor" }
+ktor-server-templating-html = { module = "io.ktor:ktor-server-html-builder", version.ref = "ktor" }
+ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor" }
+ktor-server-websockets = { module = "io.ktor:ktor-server-websockets", version.ref = "ktor" }
+
+cashapp-molecule-runtime = { module = "app.cash.molecule:molecule-runtime", version.ref = "kotlin" }
+
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback-classic" }
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
+compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
