@@ -14,6 +14,10 @@ repositories {
     gradlePluginPortal()
 }
 
+application {
+    mainClass.set("nl.helicotech.ktor.live.sample.ApplicationKt")
+}
+
 
 dependencies {
     implementation(libs.ktor.server.core)

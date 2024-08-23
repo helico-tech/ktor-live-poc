@@ -25,6 +25,10 @@ sealed interface Event {
     @Serializable
     @SerialName("subtract")
     data class Subtract(val amount: Int) : Event
+
+    @Serializable
+    @SerialName("reset")
+    data object Reset : Event
 }
 
 fun Application.module() {
@@ -47,6 +51,7 @@ fun Application.module() {
                 when (event) {
                     is Event.Add -> count += event.amount
                     is Event.Subtract -> count -= event.amount
+                    is Event.Reset -> count = 0
                 }
             }
 
@@ -61,6 +66,11 @@ fun Application.module() {
                 button {
                     action(Event.Subtract(1))
                     + "Subtract 1"
+                }
+
+                button {
+                    action(Event.Reset)
+                    +"Reset"
                 }
 
                 button {
