@@ -20,6 +20,10 @@ import kotlinx.coroutines.launch
 import kotlinx.html.*
 import kotlinx.html.stream.appendHTML
 
+class LiveContext<T>(
+    val events: Flow<T>
+)
+
 fun view(
     head: HEAD.() -> Unit = {},
     block: BODY.() -> Unit
@@ -40,16 +44,18 @@ fun view(
     }
 }
 
-fun Routing.live(
+inline fun <reified T : Any> Routing.live(
     endpoint: String,
     coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
-    body: @Composable (events: Flow<String>) -> String
+    crossinline body: @Composable LiveContext<T>.() -> String
 ) {
     var state : StateFlow<String>? = null
 
-    val events = MutableSharedFlow<String>(onBufferOverflow = BufferOverflow.DROP_OLDEST, extraBufferCapacity = 1)
+    val events = MutableSharedFlow<T>(onBufferOverflow = BufferOverflow.DROP_OLDEST, extraBufferCapacity = 1)
 
-    val flow = moleculeFlow(mode = RecompositionMode.Immediate, body = { body(events) })
+    val context = LiveContext(events)
+
+    val flow = moleculeFlow(mode = RecompositionMode.Immediate, body = { body(context) })
 
     get(endpoint) {
         if (state == null) {
@@ -66,7 +72,9 @@ fun Routing.live(
         launch {
             for (frame in incoming) {
                 if (frame is Frame.Text) {
-                    events.emit(frame.readText())
+                    val text = frame.readText()
+                    val event = serializer.decodeFromString<T>(text)
+                    events.emit(event)
                 }
             }
         }

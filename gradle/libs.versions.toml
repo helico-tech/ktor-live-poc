@@ -2,8 +2,11 @@
 kotlin = "2.0.0"
 ktor = "2.3.12"
 logback-classic =  "1.4.14"
+kotlinx-serialization = "1.7.1"
 
 [libraries]
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
+
 ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
 ktor-server-netty = { module = "io.ktor:ktor-server-netty", version.ref = "ktor" }
 ktor-server-templating-html = { module = "io.ktor:ktor-server-html-builder", version.ref = "ktor" }
@@ -16,5 +19,6 @@ logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "lo
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
 compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
