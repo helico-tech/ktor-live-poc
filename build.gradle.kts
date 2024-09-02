@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.compose)
     alias(libs.plugins.ktor)
     alias(libs.plugins.serialization)
 }
@@ -26,8 +25,6 @@ dependencies {
     implementation(libs.ktor.server.content.negotiation)
     implementation(libs.ktor.server.websockets)
     implementation(libs.kotlinx.serialization.json)
-
-    implementation(libs.cashapp.molecule.runtime)
 
     implementation(libs.logback.classic)
 
