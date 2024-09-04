@@ -85,7 +85,9 @@ class VTag(
     private fun <O> visit(consumer: TagConsumer<O>) {
         this.consumer = consumer
         this.visit {
-            content?.let { +it }
+            content?.let {
+                consumer.onTagContent(it)
+            }
             children.forEach { it.visit(consumer) }
         }
     }

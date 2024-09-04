@@ -48,5 +48,8 @@ class VTagConsumerTests {
 
         val outer = node.outerHTML()
         val inner = node.innerHTML()
+
+        assertEquals("<html><head><title>Hello</title></head><body><h1 class=\"foo bar\">World</h1></body></html>", outer)
+        assertEquals("<head><title>Hello</title></head><body><h1 class=\"foo bar\">World</h1></body>", inner)
     }
 }
