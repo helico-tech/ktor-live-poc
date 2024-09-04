@@ -1,14 +1,18 @@
 package nl.helicotech.ktor.live.lib
 
-import kotlinx.html.*
+import kotlinx.html.HTMLTag
+import kotlinx.html.Tag
+import kotlinx.html.TagConsumer
 import kotlinx.html.stream.appendHTML
+import kotlinx.html.visit
 import java.security.MessageDigest
 
-class Node(
-    val tag: Tag,
-    val children: MutableList<Node> = mutableListOf(),
+class VTag(
+    val inner: Tag,
+    val children: MutableList<VTag> = mutableListOf(),
     var content: String? = null
-) {
+) : Tag by inner {
+
     data class Fingerprint(
         val tagName: String,
         val attributes: String,
@@ -16,10 +20,10 @@ class Node(
     ) {
         companion object {
             @OptIn(ExperimentalStdlibApi::class)
-            fun fromVNode(node: Node): Fingerprint {
+            fun fromVTag(vtag: VTag): Fingerprint {
                 val hasher = MessageDigest.getInstance("SHA-256")
 
-                node.tag.attributes.entries
+                vtag.attributes.entries
                     .sortedBy { it.key }
                     .forEach { (key, value) ->
                         hasher.update(key.toByteArray())
@@ -30,14 +34,14 @@ class Node(
 
                 hasher.reset()
 
-                node.children.forEach {
+                vtag.children.forEach {
                     hasher.update(it.fingerprint.toString().toByteArray())
                 }
 
                 val children = hasher.digest().toHexString()
 
                 return Fingerprint(
-                    node.tag.tagName,
+                    vtag.tagName,
                     attributes,
                     children
                 )
@@ -49,13 +53,21 @@ class Node(
 
     val fingerprint: Fingerprint
         get() {
-            _fingerprint = _fingerprint ?: Fingerprint.fromVNode(this)
+            _fingerprint = _fingerprint ?: Fingerprint.fromVTag(this)
             return _fingerprint!!
         }
 
     fun invalidate() {
         _fingerprint = null
     }
+
+    private var _consumer: TagConsumer<*>? = null
+
+    override var consumer: TagConsumer<*>
+        get() = _consumer ?: inner.consumer
+        set(value) {
+            _consumer = value
+        }
 
     fun <O> visitAndFinalize(consumer: TagConsumer<O>): O {
         visit(consumer)
@@ -71,17 +83,8 @@ class Node(
     }
 
     private fun <O> visit(consumer: TagConsumer<O>) {
-
-        val newTag = HTMLTag(
-            tagName = tag.tagName,
-            consumer = consumer,
-            initialAttributes = tag.attributes,
-            namespace = tag.namespace,
-            inlineTag = tag.inlineTag,
-            emptyTag = tag.emptyTag
-        )
-
-        newTag.visit {
+        this.consumer = consumer
+        this.visit {
             content?.let { +it }
             children.forEach { it.visit(consumer) }
         }

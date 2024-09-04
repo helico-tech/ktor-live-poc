@@ -3,11 +3,11 @@ package nl.helicotech.ktor.live.lib
 import kotlinx.html.*
 import kotlinx.html.org.w3c.dom.events.Event
 
-class NodeTagConsumer : TagConsumer<Node> {
+class VTagConsumer : TagConsumer<VTag> {
 
-    private var result: Node? = null
+    private var result: VTag? = null
 
-    private val deque = ArrayDeque<Node>()
+    private val deque = ArrayDeque<VTag>()
 
     private val UnsafeImpl = object : Unsafe {
         override operator fun String.unaryPlus() {
@@ -19,11 +19,11 @@ class NodeTagConsumer : TagConsumer<Node> {
 
     override fun onTagStart(tag: Tag) {
         val parent = deque.firstOrNull()
-        val node = Node(tag)
+        val wrapper = VTag(tag)
 
-        parent?.children?.add(node)
+        parent?.children?.add(wrapper)
         parent?.invalidate()
-        deque.addFirst(node)
+        deque.addFirst(wrapper)
     }
 
     override fun onTagEnd(tag: Tag) {
@@ -36,10 +36,10 @@ class NodeTagConsumer : TagConsumer<Node> {
         node.invalidate()
 
         if (value == null) {
-            node.tag.attributes.remove(attribute)
+            node.inner.attributes.remove(attribute)
             return
         }
-        node.tag.attributes.put(attribute, value)
+        node.inner.attributes.put(attribute, value)
     }
 
     override fun onTagComment(content: CharSequence) {
@@ -64,13 +64,13 @@ class NodeTagConsumer : TagConsumer<Node> {
         // ignore
     }
 
-    override fun finalize(): Node {
+    override fun finalize(): VTag {
         return result ?: error("No result")
     }
 }
 
-fun buildVNode(block: NodeTagConsumer.() -> Unit): Node {
-    val consumer = NodeTagConsumer()
+fun buildVTag(block: VTagConsumer.() -> Unit): VTag {
+    val consumer = VTagConsumer()
     consumer.block()
     return consumer.finalize()
 }

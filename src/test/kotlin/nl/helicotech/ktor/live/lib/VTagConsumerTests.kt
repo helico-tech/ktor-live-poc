@@ -4,11 +4,11 @@ import kotlinx.html.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class NodeTagConsumerTests {
+class VTagConsumerTests {
 
     @Test
     fun equalTrees() {
-        val node = buildVNode {
+        val vtag = buildVTag {
             html {
                 head {
                     title { +"Hello" }
@@ -19,7 +19,7 @@ class NodeTagConsumerTests {
             }
         }
 
-        val node2 = buildVNode {
+        val vtag2 = buildVTag {
             html {
                 head {
                     title { +"Hello" }
@@ -30,12 +30,12 @@ class NodeTagConsumerTests {
             }
         }
 
-        assertEquals(node.fingerprint, node2.fingerprint)
+        assertEquals(vtag.fingerprint, vtag2.fingerprint)
     }
 
     @Test
     fun visitAndFinalize() {
-        val node = buildVNode {
+        val node = buildVTag {
             html {
                 head {
                     title { +"Hello" }
