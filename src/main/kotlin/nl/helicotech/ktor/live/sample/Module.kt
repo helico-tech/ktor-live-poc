@@ -1,6 +1,7 @@
 package nl.helicotech.ktor.live.sample
 
 import io.ktor.server.application.*
+import io.ktor.server.html.*
 import io.ktor.server.http.content.*
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
@@ -19,5 +20,7 @@ fun Application.module() {
     routing {
 
         staticResources("/assets", "assets")
+
+        get { call.respondHtml {  } }
     }
 }
