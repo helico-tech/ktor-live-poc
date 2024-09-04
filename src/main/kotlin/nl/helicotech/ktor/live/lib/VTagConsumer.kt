@@ -19,7 +19,9 @@ class VTagConsumer : TagConsumer<VTag> {
 
     override fun onTagStart(tag: Tag) {
         val parent = deque.firstOrNull()
-        val wrapper = VTag(tag)
+
+        val index = parent?.children?.size ?: 0
+        val wrapper = VTag(index, tag, parent)
 
         parent?.children?.add(wrapper)
         parent?.invalidate()

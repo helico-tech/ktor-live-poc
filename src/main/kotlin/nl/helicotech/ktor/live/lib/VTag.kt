@@ -1,6 +1,5 @@
 package nl.helicotech.ktor.live.lib
 
-import kotlinx.html.HTMLTag
 import kotlinx.html.Tag
 import kotlinx.html.TagConsumer
 import kotlinx.html.stream.appendHTML
@@ -8,7 +7,9 @@ import kotlinx.html.visit
 import java.security.MessageDigest
 
 class VTag(
+    val index: Int,
     val inner: Tag,
+    val parent: VTag?,
     val children: MutableList<VTag> = mutableListOf(),
     var content: String? = null
 ) : Tag by inner {
@@ -50,6 +51,12 @@ class VTag(
     }
 
     private var _fingerprint: Fingerprint? = null
+
+    val path by lazy {
+        generateSequence(this) { it.parent }.toList().reversed()
+    }
+
+    val indices by lazy { path.map { it.index } }
 
     val fingerprint: Fingerprint
         get() {
