@@ -17,7 +17,8 @@ class VTag(
     data class Fingerprint(
         val tagName: String,
         val attributes: String,
-        val children: String
+        val children: String,
+        val content: String? = null
     ) {
         companion object {
             @OptIn(ExperimentalStdlibApi::class)
@@ -41,10 +42,13 @@ class VTag(
 
                 val children = hasher.digest().toHexString()
 
+                val content = vtag.content
+
                 return Fingerprint(
                     vtag.tagName,
                     attributes,
-                    children
+                    children,
+                    content
                 )
             }
         }

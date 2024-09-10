@@ -1,5 +1,9 @@
 package nl.helicotech.ktor.live.lib
 
+fun diff(old: VTag, new: VTag): List<Diff> {
+    return VTagDiffer(old, new)
+}
+
 sealed interface Diff {
     data class Insert(val vTag: VTag) : Diff
     data class Remove(val vTag: VTag) : Diff
@@ -7,6 +11,8 @@ sealed interface Diff {
 
     data class SetAttribute(val old: VTag, val new: VTag, val attr: String, val value: String): Diff
     data class RemoveAttribute(val old: VTag, val new: VTag, val attr: String): Diff
+
+    data class SetContent(val new: VTag, val content: String? = null): Diff
 }
 
 interface Differ<T> {
@@ -14,12 +20,21 @@ interface Differ<T> {
 }
 
 object VTagDiffer : Differ<VTag> {
-    
+
     override fun invoke(old: VTag, new: VTag): List<Diff> {
         return when {
             old.fingerprint == new.fingerprint -> emptyList()
             old.tagName != new.tagName -> listOf(Diff.Replace(old, new))
-            else -> VTagAttributeDiffer(old, new) + VTagListDiffer(old.children, new.children)
+            else ->  VTagContentDiffer(old, new) + VTagAttributeDiffer(old, new) + VTagListDiffer(old.children, new.children)
+        }
+    }
+}
+
+object VTagContentDiffer : Differ<VTag> {
+    override fun invoke(old: VTag, new: VTag): List<Diff> {
+        return when {
+            old.content != new.content -> listOf(Diff.SetContent(new, new.content))
+            else -> emptyList()
         }
     }
 }
