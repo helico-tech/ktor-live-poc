@@ -4,17 +4,6 @@ fun diff(old: VTag, new: VTag): List<Diff> {
     return VTagDiffer(old, new)
 }
 
-sealed interface Diff {
-    data class Insert(val vTag: VTag) : Diff
-    data class Remove(val vTag: VTag) : Diff
-    data class Replace(val old: VTag, val new: VTag) : Diff
-
-    data class SetAttribute(val old: VTag, val new: VTag, val attr: String, val value: String): Diff
-    data class RemoveAttribute(val old: VTag, val new: VTag, val attr: String): Diff
-
-    data class SetContent(val new: VTag, val content: String? = null): Diff
-}
-
 interface Differ<T> {
     operator fun invoke(old: T, new: T): List<Diff>
 }
@@ -52,17 +41,17 @@ object VTagAttributeDiffer : Differ<VTag> {
         val added = newKeys.filter { !both.contains(it) }
 
         removed.forEach {
-            diffs.add(Diff.RemoveAttribute(old, new, it))
+            diffs.add(Diff.RemoveAttribute(new, it))
         }
 
         added.forEach {
-            diffs.add(Diff.SetAttribute(old, new, it, new.attributes[it]!!))
+            diffs.add(Diff.SetAttribute(new, it, new.attributes[it]!!))
         }
 
         both
             .filter { old.attributes[it] != new.attributes[it] }
             .forEach {
-                diffs.add(Diff.SetAttribute(old, new, it, new.attributes[it]!!))
+                diffs.add(Diff.SetAttribute(new, it, new.attributes[it]!!))
             }
 
         return diffs

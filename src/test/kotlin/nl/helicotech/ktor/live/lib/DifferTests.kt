@@ -1,6 +1,7 @@
 package nl.helicotech.ktor.live.lib
 
 import kotlinx.html.*
+import kotlinx.serialization.encodeToString
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
