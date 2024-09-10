@@ -7,6 +7,7 @@ import io.ktor.server.routing.*
 import io.ktor.server.routing.head
 import io.ktor.server.websocket.*
 import kotlinx.html.*
+import nl.helicotech.ktor.live.lib.action
 import nl.helicotech.ktor.live.lib.live
 import java.time.Duration
 
@@ -26,23 +27,40 @@ fun Application.module() {
 
         live<Int, Int>(
             path = "/",
-            initialState = 0,
-            update = { state, event -> state + event },
-        ) { state ->
-            html {
-                head {
-                    title { +"Live Sample" }
+            initialState = 0
+        ) {
+
+            onEvent { state, update -> state + update }
+
+            head { state ->
+                title { +"Live Sample" }
+            }
+
+            body { state ->
+                h1 {
+                    span {
+                        +"Counter "
+                    }
+
+                    span {
+                        style = if (state < 0) "color: red;" else "color: green;"
+                        +"$state"
+                    }
                 }
-                body {
-                    h1 {
-                        +"Counter: $state"
-                    }
-                    button {
-                        +"Increment"
-                    }
-                    button {
-                        +"Decrement"
-                    }
+
+                button {
+                    action(1)
+                    +"Increment"
+                }
+
+                button {
+                    action(-1)
+                    +"Decrement"
+                }
+
+                button {
+                    action(-state)
+                    +"Reset"
                 }
             }
         }
