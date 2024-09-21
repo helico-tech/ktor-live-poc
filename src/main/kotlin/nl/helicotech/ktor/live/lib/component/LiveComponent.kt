@@ -13,16 +13,18 @@ abstract class LiveComponent(
 
     abstract fun LIVECOMPONENTTAG.render()
 
-    protected inline fun <reified T : Any> data(default: T) = MapDelegate(dataset, default, serializer<T>())
+    open protected val serializersModule = Json.serializersModule
+
+    protected inline fun <reified T : Any> data(default: T) = MapDelegate(dataset, default, serializersModule.serializer())
 
     protected inline fun event(name: String, noinline handler: () -> Unit): EventHandler<Unit> {
-        return EventHandler(name, { handler() }, serializer<Unit>()).also {
+        return EventHandler(name, { handler() }, serializersModule.serializer<Unit>()).also {
             handlers[name] = it
         }
     }
 
     protected inline fun <reified T : Any> event(name: String, noinline handler: (T) -> Unit): EventHandler<T> {
-        return EventHandler(name, handler, serializer<T>()).also {
+        return EventHandler(name, handler, serializersModule.serializer()).also {
             handlers[name] = it
         }
     }

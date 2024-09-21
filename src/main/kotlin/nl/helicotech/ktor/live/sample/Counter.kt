@@ -1,6 +1,7 @@
 package nl.helicotech.ktor.live.sample
 
 import kotlinx.html.*
+import kotlinx.serialization.json.Json
 import nl.helicotech.ktor.live.lib.component.LIVECOMPONENTTAG
 import nl.helicotech.ktor.live.lib.component.LiveComponent
 import nl.helicotech.ktor.live.lib.component.action
