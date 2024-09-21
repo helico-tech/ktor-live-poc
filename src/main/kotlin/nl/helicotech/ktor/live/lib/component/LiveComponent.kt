@@ -1,66 +1,62 @@
 package nl.helicotech.ktor.live.lib.component
 
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.serializer
 import kotlin.reflect.KProperty
 
 abstract class LiveComponent(
     initialDataset: Map<String, Any> = emptyMap()
 ) {
+    val handlers = mutableMapOf<String, EventHandler<*>>()
     val dataset = initialDataset.mapValues { it.value.toString() }.toMutableMap()
-
-    constructor(vararg data : Pair<String, Any>) : this(data.toMap().mapValues { it.value.toString() }.toMutableMap())
 
     abstract fun LIVECOMPONENTTAG.render()
 
-    protected fun <T> data(default: T, transformer: StringTransformer<T>) = MapDelegate(dataset, default, transformer)
+    protected inline fun <reified T : Any> data(default: T) = MapDelegate(dataset, default, serializer<T>())
 
-    protected fun data(default: Int) = data(default, Transformers.Int)
-    protected fun data(default: String) = data(default, Transformers.String)
-    protected fun data(default: Boolean) = data(default, Transformers.Boolean)
-    protected fun data(default: Double) = data(default, Transformers.Double)
-    protected fun data(default: Float) = data(default, Transformers.Float)
+    protected inline fun event(name: String, noinline handler: () -> Unit): EventHandler<Unit> {
+        return EventHandler(name, { handler() }, serializer<Unit>()).also {
+            handlers[name] = it
+        }
+    }
+
+    protected inline fun <reified T : Any> event(name: String, noinline handler: (T) -> Unit): EventHandler<T> {
+        return EventHandler(name, handler, serializer<T>()).also {
+            handlers[name] = it
+        }
+    }
+
 
     interface Factory<T : LiveComponent> {
         val name: String
         fun create(attributes: Map<String, String> = emptyMap()): T
     }
+
+    data class EventHandler<T>(
+        val name: String,
+        val handle: (payload: T) -> Unit,
+        val serializer: KSerializer<T>,
+    ) {
+        fun handle(payload: String) {
+            handle(Json.decodeFromString(serializer, payload))
+        }
+    }
 }
 
-class MapDelegate<T>(
+class MapDelegate<T : Any>(
     private val map: MutableMap<String, String>,
     private val default: T,
-    private val transformer: StringTransformer<T>
+    private val serializer: KSerializer<T>,
 ) {
-    operator fun getValue(thisRef: Any?, property: KProperty<*>): T = map[property.name]?.let { transformer.fromString(it) } ?: default
+
+    operator fun getValue(thisRef: Any?, property: KProperty<*>): T {
+        return (map[property.name]?.let {
+            Json.decodeFromString(serializer, it)
+        } ?: default) as T
+    }
 
     operator fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
-        map[property.name] = transformer.asString(value)
-    }
-}
-
-interface StringTransformer<T> {
-    fun fromString(value: String): T
-    fun asString(value: T): String
-}
-
-object Transformers {
-    val Int = object : StringTransformer<Int> {
-        override fun fromString(value: String): Int = value.toInt()
-        override fun asString(value: Int): String = value.toString()
-    }
-    val String = object : StringTransformer<String> {
-        override fun fromString(value: String): String = value
-        override fun asString(value: String): String = value
-    }
-    val Boolean = object : StringTransformer<Boolean> {
-        override fun fromString(value: String): Boolean = value.toBoolean()
-        override fun asString(value: Boolean): String = value.toString()
-    }
-    val Double = object : StringTransformer<Double> {
-        override fun fromString(value: String): Double = value.toDouble()
-        override fun asString(value: Double): String = value.toString()
-    }
-    val Float = object : StringTransformer<Float> {
-        override fun fromString(value: String): Float = value.toFloat()
-        override fun asString(value: Float): String = value.toString()
+        map[property.name] = Json.encodeToString(serializer, value)
     }
 }
