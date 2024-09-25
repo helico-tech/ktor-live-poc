@@ -31,7 +31,6 @@ abstract class LiveComponent(
 
 
     interface Factory<T : LiveComponent> {
-        val name: String
         fun create(attributes: Map<String, String> = emptyMap()): T
     }
 

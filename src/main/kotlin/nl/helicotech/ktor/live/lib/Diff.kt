@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 
-internal fun VTag.pathAsList() = path.map { it.index }
+internal fun VTag.pathAsList() = path.drop(1).map { it.index }
 
 fun Diff.toJSON(): String = JSONSerializer.encodeToString(this)
 fun List<Diff>.toJSON(): String = JSONSerializer.encodeToString(this)

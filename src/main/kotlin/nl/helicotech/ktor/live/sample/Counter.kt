@@ -16,24 +16,29 @@ class Counter(
 
     val decrement = event("decrement") { amount: Int -> count -= amount }
 
+    val reset = event("reset") { count = 0 }
+
     override fun LIVECOMPONENTTAG.render() {
+        button {
+            action("click", increment, 1)
+            +"Increment"
+        }
+        button {
+            action("click", decrement, 1)
+            +"Decrement"
+        }
+
+        button {
+            action("click", reset)
+            +"Reset"
+        }
+
         div {
-            button {
-                action("click", increment, 1)
-                +"Increment"
-            }
-            button {
-                action("click", decrement, 1)
-                +"Decrement"
-            }
-            div {
-                +"Count: $count"
-            }
+            +"Count: $count"
         }
     }
 
     companion object : Factory<Counter> {
-        override val name = "counter"
         override fun create(attributes: Map<String, String>) = Counter(attributes)
     }
 }
