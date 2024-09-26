@@ -20,6 +20,12 @@ abstract class LiveComponent(
         }
 
         fun create(): T
+
+        fun hydrate(dataset: Map<String, String>): T {
+            val component = create()
+            component.hydrate(dataset)
+            return component
+        }
     }
 
     data class EventHandler<T>(
@@ -70,9 +76,9 @@ abstract class LiveComponent(
 
     abstract fun render(tag: LIVECOMPONENTTAG)
 
-    protected inline fun <reified T : Any?> state(default: T) = DataSetDelegate(dataset, default, serializer = serializersModule.serializer())
+    inline fun <reified T : Any?> state(default: T) = DataSetDelegate(dataset, default, serializer = serializersModule.serializer())
 
-    protected inline fun <reified T : Any?> event(noinline handle: (payload: T) -> Unit) = HandlerDelegate(handlers, handle, serializer = serializersModule.serializer())
+    inline fun <reified T : Any?> event(noinline handle: (payload: T) -> Unit) = HandlerDelegate(handlers, handle, serializer = serializersModule.serializer())
 
     fun hydrate(dataset: Map<String, String>) {
         this.dataset.clear()

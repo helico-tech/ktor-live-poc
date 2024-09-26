@@ -20,10 +20,10 @@ class LIVECOMPONENTTAG(
             *component.dataset.map { (key, value) -> "state-${key}" to value }.toTypedArray()
         ),
         consumer = consumer
-    ) {}
+    )
 }
 
-fun FlowContent.liveComponent(
+fun FlowContent.live(
     endpoint: String,
     name: String,
     component: LiveComponent
@@ -31,16 +31,16 @@ fun FlowContent.liveComponent(
     component.render(this)
 }
 
-fun FlowContent.liveComponent(
+fun FlowContent.live(
     endpoint: String,
     factory: LiveComponent.Factory<*>,
-) = liveComponent(endpoint, factory.name, factory.create())
+) = live(endpoint, factory.name, factory.create())
 
-fun <T : LiveComponent> FlowContent.liveComponent(
+fun <T : LiveComponent> FlowContent.live(
     endpoint: String,
     factory: LiveComponent.Factory<T>,
     builder: T.() -> Unit
-) = liveComponent(endpoint, factory.name, factory.create().also(builder))
+) = live(endpoint, factory.name, factory.create().also(builder))
 
 fun <T> FlowContent.action(type: String, handler: LiveComponent.EventHandler<T>, payload: T) {
     attributes["action-$type"] = handler.name
@@ -51,7 +51,7 @@ fun FlowContent.action(type: String, handler: LiveComponent.EventHandler<Unit>) 
     attributes["action-$type"] = handler.name
 }
 
-fun <T, C : TagConsumer<T>> C.liveComponent(
+fun <T, C : TagConsumer<T>> C.live(
     endpoint: String,
     name: String,
     component: LiveComponent
@@ -59,8 +59,8 @@ fun <T, C : TagConsumer<T>> C.liveComponent(
     component.render(this)
 }
 
-fun <T, C : TagConsumer<T>, K : LiveComponent> C.liveComponent(
+fun <T, C : TagConsumer<T>, K : LiveComponent> C.live(
     endpoint: String,
     factory: LiveComponent.Factory<K>,
     builder: K.() -> Unit
-) = liveComponent(endpoint, factory.name, factory.create().also(builder))
+) = live(endpoint, factory.name, factory.create().also(builder))

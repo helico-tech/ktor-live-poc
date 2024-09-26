@@ -11,9 +11,8 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.html.*
 import nl.helicotech.ktor.live.lib.buildVTag
-import nl.helicotech.ktor.live.lib.component.LiveComponent
 import nl.helicotech.ktor.live.lib.component.LiveComponentRequest
-import nl.helicotech.ktor.live.lib.component.liveComponent
+import nl.helicotech.ktor.live.lib.component.live
 import nl.helicotech.ktor.live.lib.diff
 
 
@@ -26,29 +25,28 @@ fun Application.module() {
             json()
         }
 
-        val registry = mapOf(
-            Counter.name to Counter
-        )
+        val registry = listOf(
+            MyCounter,
+            Counter
+        ).associateBy { it.name }
 
         post("/live") {
             val request = call.receive<LiveComponentRequest>()
 
             val factory = registry[request.componentName] ?: return@post call.respond(HttpStatusCode.NotFound)
 
-            val component = factory.create()
-
-            component.hydrate(request.state)
+            val component = factory.hydrate(dataset = request.state)
 
             val currentTree = buildVTag {
-                liveComponent("/live", request.componentName, component)
+                live("/live", request.componentName, component)
             }
 
-            val handler = component.handlers[request.action] ?: return@post call.respond(HttpStatusCode.NotFound)
+            val handler = component.handlers[request.action] ?: return@post call.respond(HttpStatusCode.BadRequest)
 
             handler.handle(request.payload ?: "{}")
 
             val newTree = buildVTag {
-                liveComponent("/live", request.componentName, component)
+                live("/live", request.componentName, component)
             }
 
             val changes = diff(currentTree, newTree)
@@ -65,9 +63,7 @@ fun Application.module() {
                     }
                 }
                 body {
-                    liveComponent("/live", Counter) {
-                        count = 2
-                    }
+                    live("/live", MyCounter)
                 }
             }
         }

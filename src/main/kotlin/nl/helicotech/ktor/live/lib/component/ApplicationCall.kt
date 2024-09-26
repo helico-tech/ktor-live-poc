@@ -5,6 +5,6 @@ import kotlinx.html.stream.appendHTML
 
 fun ApplicationCall.respondLiveComponent(endpoint: String, name: String, component: LiveComponent) {
     val text = buildString {
-        appendHTML().liveComponent(endpoint, name, component)
+        appendHTML().live(endpoint, name, component)
     }
 }
