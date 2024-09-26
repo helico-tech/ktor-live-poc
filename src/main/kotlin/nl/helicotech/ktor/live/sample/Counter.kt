@@ -1,24 +1,21 @@
 package nl.helicotech.ktor.live.sample
 
 import kotlinx.html.*
-import kotlinx.serialization.json.Json
 import nl.helicotech.ktor.live.lib.component.LIVECOMPONENTTAG
 import nl.helicotech.ktor.live.lib.component.LiveComponent
 import nl.helicotech.ktor.live.lib.component.action
 
-class Counter(
-    initialAttributes: Map<String, Any> = emptyMap(),
-) : LiveComponent(initialAttributes) {
+class Counter: LiveComponent() {
 
-    var count by data(0)
+    var count by state<Int>(0)
 
-    val increment = event("increment") { amount: Int -> count += amount }
+    val increment by event<Int> { amount -> count += amount }
 
-    val decrement = event("decrement") { amount: Int -> count -= amount }
+    val decrement by event<Int> { amount -> count -= amount }
 
-    val reset = event("reset") { count = 0 }
+    val reset by event<Unit> { count = 0 }
 
-    override fun LIVECOMPONENTTAG.render() {
+    override fun render(tag: LIVECOMPONENTTAG) = tag.run {
         button {
             action("click", increment, 1)
             +"Increment"
@@ -30,6 +27,9 @@ class Counter(
 
         button {
             action("click", reset)
+            if (count  == 0) {
+                disabled = true
+            }
             +"Reset"
         }
 
@@ -39,6 +39,7 @@ class Counter(
     }
 
     companion object : Factory<Counter> {
-        override fun create(attributes: Map<String, String>) = Counter(attributes)
+
+        override fun create(): Counter = Counter()
     }
 }

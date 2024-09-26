@@ -11,6 +11,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.html.*
 import nl.helicotech.ktor.live.lib.buildVTag
+import nl.helicotech.ktor.live.lib.component.LiveComponent
 import nl.helicotech.ktor.live.lib.component.LiveComponentRequest
 import nl.helicotech.ktor.live.lib.component.liveComponent
 import nl.helicotech.ktor.live.lib.diff
@@ -26,7 +27,7 @@ fun Application.module() {
         }
 
         val registry = mapOf(
-            Counter.javaClass.simpleName to Counter
+            Counter.name to Counter
         )
 
         post("/live") {
@@ -34,7 +35,9 @@ fun Application.module() {
 
             val factory = registry[request.componentName] ?: return@post call.respond(HttpStatusCode.NotFound)
 
-            val component = factory.create(request.state)
+            val component = factory.create()
+
+            component.hydrate(request.state)
 
             val currentTree = buildVTag {
                 liveComponent("/live", request.componentName, component)
@@ -63,7 +66,7 @@ fun Application.module() {
                 }
                 body {
                     liveComponent("/live", Counter) {
-                        count = 5
+                        count = 2
                     }
                 }
             }

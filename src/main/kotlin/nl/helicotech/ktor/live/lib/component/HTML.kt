@@ -28,28 +28,19 @@ fun FlowContent.liveComponent(
     name: String,
     component: LiveComponent
 ) = LIVECOMPONENTTAG(endpoint, name, component, consumer).visit {
-    with(component) {
-        render()
-    }
+    component.render(this)
 }
 
 fun FlowContent.liveComponent(
     endpoint: String,
     factory: LiveComponent.Factory<*>,
-    attributes: Map<String, String> = emptyMap()
-) = liveComponent(endpoint, factory.javaClass.simpleName, factory.create(attributes))
-
-fun FlowContent.liveComponent(
-    endpoint: String,
-    factory: LiveComponent.Factory<*>,
-    vararg attributes: Pair<String, Any> = emptyArray()
-) = liveComponent(endpoint, factory, attributes.toMap().mapValues { it.value.toString() })
+) = liveComponent(endpoint, factory.name, factory.create())
 
 fun <T : LiveComponent> FlowContent.liveComponent(
     endpoint: String,
     factory: LiveComponent.Factory<T>,
     builder: T.() -> Unit
-) = liveComponent(endpoint, factory.javaClass.simpleName, factory.create().also(builder))
+) = liveComponent(endpoint, factory.name, factory.create().also(builder))
 
 fun <T> FlowContent.action(type: String, handler: LiveComponent.EventHandler<T>, payload: T) {
     attributes["action-$type"] = handler.name
@@ -65,7 +56,11 @@ fun <T, C : TagConsumer<T>> C.liveComponent(
     name: String,
     component: LiveComponent
 ) = LIVECOMPONENTTAG(endpoint, name, component, this).visitAndFinalize(this) {
-    with(component) {
-        render()
-    }
+    component.render(this)
 }
+
+fun <T, C : TagConsumer<T>, K : LiveComponent> C.liveComponent(
+    endpoint: String,
+    factory: LiveComponent.Factory<K>,
+    builder: K.() -> Unit
+) = liveComponent(endpoint, factory.name, factory.create().also(builder))
